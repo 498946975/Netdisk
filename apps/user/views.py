@@ -210,7 +210,6 @@ def get_department_datas(user_id: str = Depends(token.parse_token),
     return {"code": 200, "msg": "查询成功", "departments": departments}
 
 
-
 @router.get("/get_no_departments", tags=["用户模块"])
 def get_no_department_datas(id: int, user_id: str = Depends(token.parse_token),
                             db: Session = Depends(get_db)):

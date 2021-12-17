@@ -1,12 +1,14 @@
 from fastapi import Depends, Request, APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from functools import reduce
 from db.get_db import get_db
 from utils.get_md5_data import get_md5_pwd
 from utils.user_operation import get_user_by_username_and_pwd, get_user_by_id, update_time_and_ip
 from fastapi.responses import JSONResponse
 from utils import token
 from datetime import timedelta
+from utils.users_permission_operation import get_role_id_by_user_id
 import datetime
 
 router = APIRouter(
@@ -14,7 +16,7 @@ router = APIRouter(
 )
 
 # token过期时间
-EXPIRE_MINUTE = 60
+EXPIRE_MINUTE = 1440
 
 
 @router.post("/", tags=["登录模块"])
@@ -57,9 +59,29 @@ def Login(request: Request, user: OAuth2PasswordRequestForm = Depends(), db: Ses
         return JSONResponse(content=content)
 
 
-# 返回首页数据
 @router.get("/index", tags=["首页模块"])
 def Index(id: str = Depends(token.parse_token), db: Session = Depends(get_db)):
     # 根据token解析出来的id查询数据库
     user = get_user_by_id(db, int(id))
     return user
+
+
+@router.get("/get_menus", tags=["首页模块"])
+def get_menus(
+        user_id: str = Depends(token.parse_token),
+        db: Session = Depends(get_db)):
+    """
+    根据用户的ID，获取角色权限，实现动态展示首页功能菜单
+    :param id:
+    :param db:
+    :return:
+    """
+    # 根据token拿到user_id，查询这个user下，绑定了什么role
+    tree = get_role_id_by_user_id(db, int(user_id))
+
+    # Google一下：python 列表中的字典去重
+    # 对重复的权限进行去重
+    run_function = lambda x, y: x if y in x else x + [y]
+    set_tree = reduce(run_function, [[], ] + tree)
+    # todo 假如tree为空，也就是没有权限，跳转到没有权限的页面
+    return {"code": 200, "msg": "查询成功", "tree": set_tree}
