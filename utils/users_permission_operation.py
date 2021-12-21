@@ -208,7 +208,7 @@ def get_role_id_by_user_id(db: Session, user_id: int):
                     first_menu["subs"] = (get_menu_children(db, children))
                 tree.append(first_menu)
 
-        return tree
+    return tree
 
 
 # 递归获取所有的子解点，无限递归
