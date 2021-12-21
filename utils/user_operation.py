@@ -111,7 +111,8 @@ def user_update(db: Session, id: int, username: str, pwd: str, addr: str, state:
     department = db.query(Department).filter(Department.name == department_name).first()
 
     user = db.query(User).filter(User.id == id).first()
-    if user.is_delete == 1:
+    # 判断用户是否软删除，0是没有删除，1是已经删除
+    if user.is_delete == 0:
         user.username = username
         user.state = state
         user.addr = addr
@@ -121,6 +122,9 @@ def user_update(db: Session, id: int, username: str, pwd: str, addr: str, state:
             user.pwd = pwd
         db.commit()
         db.flush()
+        return "successful"
+    else:
+        return "fail"
 
 
 def delete_user_by_id(db: Session, id: int):

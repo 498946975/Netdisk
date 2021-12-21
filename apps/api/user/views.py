@@ -105,8 +105,11 @@ async def edit(
     else:
         md5_pwd = None
     # 数据库更新
-    user_update(db, id, username, md5_pwd, addr, state, file_path, department_name)
-    return {"code": 200, "msg": "更新成功", "id": id}
+    resp = user_update(db, id, username, md5_pwd, addr, state, file_path, department_name)
+    if resp == 'successful':
+        return {"code": 200, "msg": "更新成功", "id": id}
+    else:
+        return {"code": 500, "msg": "用户已删除，请联系管理员", "id": id}
 
 
 @router.post("/delete", tags=["用户模块"])

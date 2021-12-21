@@ -5,7 +5,6 @@ from utils.users_permission_operation import get_bound_and_unbound_users, \
     add_role_users, get_permissions_tree, get_permission_ids_by_role_id, \
     add_role_permission
 from sqlalchemy.orm import Session
-from models.role.users_permissions_model import RoleUsers, RolePermissions
 
 router = APIRouter(
     prefix="/users_permissions"

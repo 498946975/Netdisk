@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, Form, UploadFile, File
-from sqlalchemy.orm import Session
 from utils import token
 from utils.create_dir import create_dir
 from db.get_db import get_db
@@ -7,9 +6,7 @@ from utils.docs_operation import *
 from fastapi.responses import JSONResponse
 from models.docs.docs_ret import DocsRet
 from utils.get_random import get_random_num, get_timestemp
-import datetime
-from fastapi.security import OAuth2PasswordRequestForm
-from datetime import timedelta
+
 
 router = APIRouter(
     prefix="/docs"
@@ -68,6 +65,7 @@ def delete_doc(docs: DocsRet, user_id: str = Depends(token.parse_token),
     :param db:
     :return:
     """
+    # todo 需要做软删除，需要重新构建models，增加软删除的字段
     id = docs.id
     delete_doc_by_id(db, id)
     return JSONResponse(content={"code": 200, "msg": "删除成功", "id": id})
@@ -106,7 +104,7 @@ def query(
     return content
 
 
-@router.post("/add", tags=["文档模块"])
+@router.post("/add_folder", tags=["文档模块"])
 def add(
         name: str = Form(...),
         pid: int = Form(...),
@@ -140,7 +138,7 @@ def add(
     return JSONResponse(content={"code": 200, "msg": "添加成功"})
 
 
-@router.post("/upload", tags=["文档模块"])
+@router.post("/upload_files", tags=["文档模块"])
 async def upload(
         file: UploadFile = File(...),
         pid: int = Form(...),
@@ -157,7 +155,7 @@ async def upload(
     :return:
     """
     rep = await file.read()
-    # todo 文件名称可能会重复:12个随机数+时间戳
+    # 文件名称可能会重复:12个随机数+时间戳
     new_prefix = get_random_num(12) + "-" + get_timestemp()
     new_name = new_prefix + "-" + file.filename
     file_path = get_path_by_pid(db, pid) + "/" + new_name

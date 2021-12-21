@@ -64,7 +64,7 @@ def get_no_parents(id: int, user_id: str = Depends(token.parse_token),
     parents_name = []
     for parent in parents:
         parents_name.append(parent.name)
-    return {"code": 200, "msg": "更新成功", "parents_name": parents_name}
+    return {"code": 200, "msg": "查询成功", "parents_name": parents_name}
 
 
 @router.post("/edit", tags=["权限模块"])
