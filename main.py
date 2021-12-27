@@ -18,6 +18,12 @@ app = FastAPI(
     description="fastapi_test"
 )
 
+# app = FastAPI(
+#     title=settings.PROJECT_NAME,
+#     openapi_url=f"{settings.API_V1_STR}/openapi.json",
+#     description="fastapi_test"
+# )
+
 app.include_router(login_router)
 app.include_router(user_router)
 app.include_router(department_router)
