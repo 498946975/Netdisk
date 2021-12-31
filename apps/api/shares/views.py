@@ -71,7 +71,7 @@ def share_add(
     return {"code": 200, "msg": "分享成功", "share_url": share_url, "share_pwd": sharePwd}
 
 
-@router.post("/share_adds", tags=["文档模块"])
+@router.post("/share_adds", tags=["分享操作"])
 def share_adds(
         sharePwd: str = Form(None),
         share_type: int = Form(...),
