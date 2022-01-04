@@ -1,17 +1,19 @@
 import datetime
 from fastapi import APIRouter, Depends, Form, UploadFile, File
+from fastapi.responses import JSONResponse
+from fastapi.security import OAuth2PasswordRequestForm
 from utils import token
 from utils.get_share import get_share_random_str
 from db.get_db import get_db
 from utils.docs_operation import *
-from utils.shares_operation import share_db_add, share_db_adds
+from utils.shares_operation import share_db_add, share_db_adds, share_db_varify, get_share_docs_pagenation
 
 router = APIRouter(
     prefix="/shares"
 )
 
 
-@router.post("/share_add", tags=["分享操作"])
+@router.post("/share_add", tags=["分享模块"])
 def share_add(
         sharePwd: str = Form(None),
         share_type: int = Form(...),
@@ -57,8 +59,8 @@ def share_add(
             now_time = datetime.datetime.now()
             end_time = now_time + datetime.timedelta(days=1)
     elif share_type == 1:
-        now_time = datetime.datetime.now()
-        end_time = now_time + datetime.timedelta(days=99999)
+        # 如果分享时间是永久的，那么就把end_time设置成当前时间
+        end_time = datetime.datetime.now()
     # 访问状态设置
     state = 1
     share_db_add(
@@ -71,7 +73,7 @@ def share_add(
     return {"code": 200, "msg": "分享成功", "share_url": share_url, "share_pwd": sharePwd}
 
 
-@router.post("/share_adds", tags=["分享操作"])
+@router.post("/share_adds", tags=["分享模块"])
 def share_adds(
         sharePwd: str = Form(None),
         share_type: int = Form(...),
@@ -119,8 +121,8 @@ def share_adds(
             now_time = datetime.datetime.now()
             end_time = now_time + datetime.timedelta(days=1)
     elif share_type == 1:
-        now_time = datetime.datetime.now()
-        end_time = now_time + datetime.timedelta(days=99999)
+        # 如果分享时间是永久的，那么就把end_time设置成当前时间
+        end_time = datetime.datetime.now()
 
     state = 1
     share_db_adds(
@@ -132,3 +134,62 @@ def share_adds(
     )
 
     return {"code": 200, "msg": "分享成功", "share_url": share_url, "share_pwd": sharePwd}
+
+
+@router.post("/share_varify", tags=["分享模块"])
+def share_varify(user: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    """
+    校验用户提取分享时候，输入的url和提取码
+    :param user: 在这是前端传过来的url和提取码
+    :param db:
+    :return:
+    """
+    # share_token过期时间
+    EXPIRE_MINUTE = 60
+    share_url = user.username
+    share_pwd = user.password
+    # 从数据库校验url和提取码
+    share = share_db_varify(db, share_url, share_pwd)
+    if share:
+        # 生成token
+        expire_time = datetime.timedelta(minutes=EXPIRE_MINUTE)
+        ret_token = token.create_token({"sub": str(share.id)}, expire_time)
+        content = {"code": 200, "msg": "校验成功", "share_token": ret_token}
+        return JSONResponse(content=content)
+    else:
+        content = {"code": 500, "msg": "提取码错误"}
+        return JSONResponse(content=content)
+
+
+@router.get("/get_docs_by_share_id", tags=["分享模块"])
+def get_docs_by_share_id(
+        page_size: int,  # 每页显示几条
+        current_page: int,  # 当前在第几页
+        share_id: str = Depends(token.parse_token),  # 根据share_token获取share_id
+        db: Session = Depends(get_db)):
+    """
+    根据分享的id，获取分享的文件and文件夹
+    :param page_size:
+    :param current_page:
+    :param share_id:
+    :param db:
+    :return:
+    """
+    docs = get_share_docs_pagenation(db, page_size, current_page, int(share_id))
+    total = len(docs)
+    if total != 0:
+        content = {
+            "code": 200,
+            "msg": "查询成功",
+            "docs": docs,
+            "pageSize": page_size,
+            "pageTotal": total,
+            "currentPage": current_page
+        }
+    else:
+        content = {
+            "code": 500,
+            "msg": "分享已过期",
+            "pageTotal": 0
+        }
+    return content
