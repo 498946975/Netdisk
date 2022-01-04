@@ -9,6 +9,7 @@ from apps.api.permission.views import router as permission_router
 from apps.api.role.users_permissions_views import router as users_permissions_router
 from apps.api.docs.views import router as docs_router
 from apps.api.shares.views import router as shares_router
+from apps.api.download.views import router as download_router
 
 # 创建数据库表结构
 Base.metadata.create_all(bind=Engine)
@@ -32,6 +33,7 @@ app.include_router(permission_router)
 app.include_router(users_permissions_router)
 app.include_router(docs_router)
 app.include_router(shares_router)
+app.include_router(download_router)
 
 if __name__ == '__main__':
     uvicorn.run(app="main:app", reload=True, host="127.0.0.1", port=8080)

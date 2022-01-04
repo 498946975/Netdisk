@@ -127,7 +127,7 @@ def get_share_docs_pagenation(db: Session, page_size: int, current_page: int, sh
     :return:
     """
     share: Shares = db.query(Shares).filter(Shares.id == share_id).first()
-    # 表示有人数限制
+    # 表示有人数限制，access_type=1的时候不判断
     if share.access_type == 2 and share.access_number <= 0:
         docs = []
     elif share.share_type != 1:  # 表示有过期时间
@@ -166,10 +166,10 @@ def get_share_docs_pagenation(db: Session, page_size: int, current_page: int, sh
             Docs.create_time
         ).filter(Docs.id.in_(doc_ids)).order_by(Docs.id.desc()).limit(page_size).offset(
             (current_page - 1) * page_size).all()
-
-    if share.numType == 2:
-        if share.nums > 0:
-            share.nums = share.nums - 1
+    # 访问次数自减少
+    if share.access_type == 2:
+        if share.access_number > 0:
+            share.access_number = share.access_number - 1
             db.commit()
             db.flush()
             db.refresh(share)

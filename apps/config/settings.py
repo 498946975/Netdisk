@@ -24,7 +24,6 @@ class Settings(BaseSettings):
     #
     DB_USERNAME = "root"
     DB_PWD = "123"
-    DB_PRO_HOST = "81.70.88.52"
     DB_TEST_HOST = "172.16.120.44"
     DB_PORT = "3306"
     DB_NAME = "test_fastapi"
