@@ -154,6 +154,8 @@ async def upload(
     :param db:
     :return:
     """
+    if pid == 0 and flag == 2:
+        return {"code": 500, "msg": "不允许在根目录下上传文件"}
     rep = await file.read()
     # 文件名称可能会重复:12个随机数+时间戳
     new_prefix = get_random_num(12) + "-" + get_timestemp()

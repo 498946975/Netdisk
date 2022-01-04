@@ -172,21 +172,3 @@ def perm_pz(
     add_role_perms(db, id, perms)
     return {"code": 200, "msg": "权限配置成功", "id": id}
 
-
-# 获取菜单
-from functools import reduce
-
-
-@router.get("/get_menus", tags=["角色模块"])
-def get_menus(
-        id: str = Depends(token.parse_token),
-        db: Session = Depends(get_db)
-):
-    tree = get_role_id_by_user_id(db, int(id))
-
-    # 对重复的权限进行去重
-    run_function = lambda x, y: x if y in x else x + [y]
-
-    set_tree = reduce(run_function, [[], ] + tree)
-    # todo 假如tree为空，也就是没有权限，跳转到没有权限的页面
-    return {"code": 200, "msg": "查询成功", "tree": set_tree}
