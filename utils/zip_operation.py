@@ -21,6 +21,13 @@ def zip_dir(output_file, dir):
 
 
 def zip_file_or_dir(db: Session, output_file, docs: [Docs]):
+    """
+    打包多个文件+文件夹
+    :param db:
+    :param output_file:
+    :param docs:
+    :return:
+    """
     zp = zipfile.ZipFile(output_file, "w")
     for doc in docs:
         if doc.flag == 1:  # 文件夹
@@ -28,7 +35,7 @@ def zip_file_or_dir(db: Session, output_file, docs: [Docs]):
                 fpath = path.replace(doc.filepath.rsplit("/", 1)[0], "")
                 for filename in filenames:
                     zp.write(os.path.join(path, filename), os.path.join(fpath, filename))
-        else:
+        else:   # 文件
             p_doc = db.query(Docs).filter(Docs.id == doc.pid).first()
             fpath = doc.filepath.replace(p_doc.filepath, "")
             zp.write(doc.filepath, os.path.join(fpath, doc.name))
