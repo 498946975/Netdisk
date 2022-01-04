@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
 from models.role.role_model import Role
 from models.user.user_model import User
-
-
-# from models.permission.permission_model import Permission
+from models.permission.permission_model import Permission
+from models.role.users_permissions_model import RoleUsers
+from models.role.users_permissions_model import RolePermissions
 
 
 def get_role_by_id(db: Session, id: int) -> Role:
@@ -167,139 +167,140 @@ def add_role_users(db: Session, id: int, users: [str]):
     db.commit()
     db.flush()
 
-# # 获取权限树
-# def get_permissions_tree(db: Session, role_id: int):
-#     tree = []
-#     # 获取所有的一级菜单：parent_id =0
-#     first_level_perms = db.query(Permission).order_by(Permission.sort.desc()).filter(Permission.parent_id == 0).all()
-#
-#     for first_level in first_level_perms:
-#         first_menu = {
-#             "id": first_level.id,
-#             "label": first_level.name,
-#             "children": []
-#         }
-#
-#         children = db.query(Permission).filter(Permission.parent_id == first_level.id).all()
-#
-#         if children:
-#             # todo 将返回的结果添加到children下
-#             first_menu["children"] = (get_children(db, children))
-#         tree.append(first_menu)
-#
-#     return tree
-#
-#
-# # 递归获取所有的子解点，无限递归
-# def get_children(db: Session, children: [Permission]):
-#     son_children = []
-#
-#     for child in children:
-#         next_menu = {
-#             "id": child.id,
-#             "label": child.name,
-#             "children": []
-#         }
-#
-#         next_children = db.query(Permission).filter(Permission.parent_id == child.id).all()
-#
-#         if next_children:
-#             next_menu["children"] = (get_children(db, next_children))
-#
-#         son_children.append(next_menu)
-#
-#     return son_children
-#
-#
-# # 根据role_id获取所有的权限id：权限id列表
-# def get_permission_ids_by_role_id(db: Session, role_id: int):
-#     perms = db.query(RolePermissions.perm_id).filter(RolePermissions.role_id == role_id).all()
-#     perm_ids = []
-#     for perm in perms:
-#         perm_ids.append(perm.perm_id)
-#
-#     return perm_ids
-#
-#
-# # 角色绑定权限
-# def add_role_perms(db: Session, id: int, perms: [str]):
-#     role_perms_dels = db.query(RolePermissions).filter(RolePermissions.role_id == id).all()
-#     if role_perms_dels:
-#         for role_perms_del in role_perms_dels:
-#             db.delete(role_perms_del)
-#
-#     role_perms_add = []
-#     if perms:
-#         for perm in perms:
-#             role_user = RolePermissions(
-#                 role_id=id,
-#                 perm_id=perm,
-#             )
-#             role_perms_add.append(role_user)
-#
-#     db.add_all(role_perms_add)
-#     db.commit()
-#     db.flush()
-#
-#
-# def get_role_id_by_user_id(db: Session, user_id: int):
-#     tree = []
-#
-#     # 一个用户可以分配多个角色
-#     role_users = db.query(RoleUsers.role_id).filter(RoleUsers.user_id == user_id).all()
-#
-#     for role_user in role_users:
-#         role_id = role_user.role_id
-#         role_perms = db.query(RolePermissions.perm_id).filter(RolePermissions.role_id == role_id).all()
-#         for role_perm in role_perms:
-#             perm_id = role_perm.perm_id
-#             # 查一级菜单
-#             first_level_perms = db.query(Permission).filter(Permission.id == perm_id, Permission.parent_id == 0).all()
-#
-#             for first_level in first_level_perms:
-#                 if first_level.name == "首页":
-#                     first_menu = {
-#                         "icon": first_level.icon,
-#                         "index": first_level.url,
-#                         "title": first_level.name
-#                     }
-#                 else:
-#                     first_menu = {
-#                         "icon": first_level.icon,
-#                         "index": first_level.url,
-#                         "title": first_level.name,
-#                         "subs": []
-#                     }
-#
-#                 children = db.query(Permission).filter(Permission.parent_id == first_level.id).all()
-#
-#                 if children:
-#                     # todo 将返回的结果添加到children下
-#                     first_menu["subs"] = (get_menu_children(db, children))
-#                 tree.append(first_menu)
-#
-#     return tree
-#
-#
-# # 递归获取所有的子解点，无限递归
-# def get_menu_children(db: Session, children: [Permission]):
-#     son_children = []
-#
-#     for child in children:
-#         next_menu = {
-#             # "icon": child.icon,
-#             "index": child.url,
-#             "title": child.name,
-#             "subs": []
-#         }
-#
-#         next_children = db.query(Permission).filter(Permission.parent_id == child.id).all()
-#
-#         if next_children:
-#             next_menu["subs"] = (get_menu_children(db, next_children))
-#         else:
-#             next_menu.pop("subs")
-#
-#         son_children.append(next_menu)
-#
-#     return son_children
+
+# 获取权限树
+def get_permissions_tree(db: Session, role_id: int):
+    tree = []
+    # 获取所有的一级菜单：parent_id =0
+    first_level_perms = db.query(Permission).order_by(Permission.sort.desc()).filter(Permission.parent_id == 0).all()
+
+    for first_level in first_level_perms:
+        first_menu = {
+            "id": first_level.id,
+            "label": first_level.name,
+            "children": []
+        }
+
+        children = db.query(Permission).filter(Permission.parent_id == first_level.id).all()
+
+        if children:
+            # todo 将返回的结果添加到children下
+            first_menu["children"] = (get_children(db, children))
+        tree.append(first_menu)
+
+    return tree
+
+
+# 递归获取所有的子解点，无限递归
+def get_children(db: Session, children: [Permission]):
+    son_children = []
+
+    for child in children:
+        next_menu = {
+            "id": child.id,
+            "label": child.name,
+            "children": []
+        }
+
+        next_children = db.query(Permission).filter(Permission.parent_id == child.id).all()
+
+        if next_children:
+            next_menu["children"] = (get_children(db, next_children))
+
+        son_children.append(next_menu)
+
+    return son_children
+
+
+# 根据role_id获取所有的权限id：权限id列表
+def get_permission_ids_by_role_id(db: Session, role_id: int):
+    perms = db.query(RolePermissions.perm_id).filter(RolePermissions.role_id == role_id).all()
+    perm_ids = []
+    for perm in perms:
+        perm_ids.append(perm.perm_id)
+
+    return perm_ids
+
+
+# 角色绑定权限
+def add_role_perms(db: Session, id: int, perms: [str]):
+    role_perms_dels = db.query(RolePermissions).filter(RolePermissions.role_id == id).all()
+    if role_perms_dels:
+        for role_perms_del in role_perms_dels:
+            db.delete(role_perms_del)
+
+    role_perms_add = []
+    if perms:
+        for perm in perms:
+            role_user = RolePermissions(
+                role_id=id,
+                perm_id=perm,
+            )
+            role_perms_add.append(role_user)
+
+    db.add_all(role_perms_add)
+    db.commit()
+    db.flush()
+
+
+def get_role_id_by_user_id(db: Session, user_id: int):
+    tree = []
+
+    # 一个用户可以分配多个角色
+    role_users = db.query(RoleUsers.role_id).filter(RoleUsers.user_id == user_id).all()
+
+    for role_user in role_users:
+        role_id = role_user.role_id
+        role_perms = db.query(RolePermissions.perm_id).filter(RolePermissions.role_id == role_id).all()
+        for role_perm in role_perms:
+            perm_id = role_perm.perm_id
+            # 查一级菜单
+            first_level_perms = db.query(Permission).filter(Permission.id == perm_id, Permission.parent_id == 0).all()
+
+            for first_level in first_level_perms:
+                if first_level.name == "首页":
+                    first_menu = {
+                        "icon": first_level.icon,
+                        "index": first_level.url,
+                        "title": first_level.name
+                    }
+                else:
+                    first_menu = {
+                        "icon": first_level.icon,
+                        "index": first_level.url,
+                        "title": first_level.name,
+                        "subs": []
+                    }
+
+                children = db.query(Permission).filter(Permission.parent_id == first_level.id).all()
+
+                if children:
+                    # todo 将返回的结果添加到children下
+                    first_menu["subs"] = (get_menu_children(db, children))
+                tree.append(first_menu)
+
+    return tree
+
+
+# 递归获取所有的子解点，无限递归
+def get_menu_children(db: Session, children: [Permission]):
+    son_children = []
+
+    for child in children:
+        next_menu = {
+            # "icon": child.icon,
+            "index": child.url,
+            "title": child.name,
+            "subs": []
+        }
+
+        next_children = db.query(Permission).filter(Permission.parent_id == child.id).all()
+
+        if next_children:
+            next_menu["subs"] = (get_menu_children(db, next_children))
+        else:
+            next_menu.pop("subs")
+
+        son_children.append(next_menu)
+
+    return son_children
