@@ -173,9 +173,11 @@ def get_pname_by_pid(db: Session, pid: int) -> str:
     :return:
     """
     doc: Docs = db.query(Docs).filter(Docs.id == pid).first()
-    # name_list = ["四级文件夹","三级文件夹","二级文件夹","一级文件夹",]
+    # 拿到最深层的文件夹名称
     name = doc.name
+    # 形成列表
     name_list = [name]
+    # 例如name_list = ["四级文件夹","三级文件夹","二级文件夹","一级文件夹",]
     if doc.pid != 0:
         name_list = get_parent_name(db, doc, name_list)
     return name_list
@@ -183,7 +185,7 @@ def get_pname_by_pid(db: Session, pid: int) -> str:
 
 def get_parent_name(db: Session, doc: Docs, name_list: [str]):
     """
-    递归查询parent_name
+    递归查询文件夹层级，查找父级别的文件夹名称
     :param db:
     :param doc:
     :param name_list:
@@ -221,7 +223,7 @@ def add_docs(db: Session, name: str, user_id: int, pid: int, path: str):
 
 def get_path_by_pid(db: Session, pid: int) -> str:
     """
-    给出parent_id，获取该pid的路径
+    根据pid，查找path路径
     :param db:
     :param pid:
     :return:

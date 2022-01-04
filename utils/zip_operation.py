@@ -13,6 +13,7 @@ def zip_dir(output_file, dir):
     """
     zp = zipfile.ZipFile(output_file, "w")
     for path, dirname, filenames in os.walk(dir):
+        # 去掉uploads/docs/这个层级
         fpath = path.replace(dir, "")
         for filename in filenames:
             zp.write(os.path.join(path, filename), os.path.join(fpath, filename))

@@ -128,6 +128,8 @@ def add(
         create_dir(path)
     else:
         name_list = get_pname_by_pid(db, pid)
+        # 例如name_list = ["四级文件夹", "三级文件夹", "二级文件夹", "一级文件夹", ]
+        # reversed的作用是反转一下，变为["一级文件夹", "二级文件夹", "三级文件夹", "四级文件夹", ]
         new_name_list = list(reversed(name_list))
         new_name_list = "/".join(new_name_list)
         path = base_dir + new_name_list + "/" + name
