@@ -10,20 +10,17 @@ from apps.api.role.users_permissions_views import router as users_permissions_ro
 from apps.api.docs.views import router as docs_router
 from apps.api.shares.views import router as shares_router
 from apps.api.download.views import router as download_router
+from apps.config.settings import settings
 
 # 创建数据库表结构
 Base.metadata.create_all(bind=Engine)
 
 app = FastAPI(
-    title="fastapi_test",
-    description="fastapi_test"
+    title=settings.TITLE,
+    description=settings.DESC
 )
 
-# app = FastAPI(
-#     title=settings.PROJECT_NAME,
-#     openapi_url=f"{settings.API_V1_STR}/openapi.json",
-#     description="fastapi_test"
-# )
+
 
 app.include_router(login_router)
 app.include_router(user_router)
