@@ -85,3 +85,13 @@ def get_menus(
     set_tree = reduce(run_function, [[], ] + tree)
     # todo 假如tree为空，也就是没有权限，跳转到没有权限的页面
     return {"code": 200, "msg": "查询成功", "tree": set_tree}
+
+
+@router.get("/get_user", tags=["首页模块"])
+def get_user(
+        id: str = Depends(token.parse_token),
+        db: Session = Depends(get_db)
+):
+    user = get_user_by_id(db, int(id))
+
+    return {"code": 200, "msg": "查询成功", "user": user}

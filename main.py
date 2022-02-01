@@ -11,6 +11,7 @@ from apps.api.docs.views import router as docs_router
 from apps.api.shares.views import router as shares_router
 from apps.api.download.views import router as download_router
 from apps.config.settings import settings
+from fastapi.middleware.cors import CORSMiddleware
 
 # 创建数据库表结构
 Base.metadata.create_all(bind=Engine)
@@ -20,7 +21,14 @@ app = FastAPI(
     description=settings.DESC
 )
 
-
+# 跨域请求
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+    allow_credentials=True
+)
 
 app.include_router(login_router)
 app.include_router(user_router)
