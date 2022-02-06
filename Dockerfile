@@ -1,5 +1,5 @@
 #基于的基础镜像
-FROM python:3.7
+FROM harbor.liuxiang.com/python/python:3.7
 
 #语言编码设置
 RUN localedef -c -f UTF-8 -i zh_CN zh_CN.utf8
