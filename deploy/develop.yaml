@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: netdisk_develop
+  namespace: develop
+spec:
+  selector:
+    app: netdisk_develop
+  ports:
+  - name: http
+    targetPort: 8000
+    port: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netdisk_develop
+  namespace: develop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: netdisk_develop
+  template:
+    metadata:
+      labels:
+        app: netdisk_develop
+    spec:
+      containers:
+      - name: netdisk_develop
+        image: harbor.liuxiang.com/netdisk_develop/netdisk_develop:<BUILD_TAG>
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/bash"]
+        args: ["-c", "python3 main.py"]
+        ports:
+        - name: http
+          containerPort: 8888
+        env:
+        - name: branch
+          value: <BRANCH_NAME>
