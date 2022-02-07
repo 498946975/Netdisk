@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: netdisk_production
+  name: netdisk-production
   namespace: production
 spec:
   selector:
-    app: netdisk_production
+    app: netdisk-production
   ports:
   - name: http
     targetPort: 8888
@@ -14,20 +14,20 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: netdisk_production
+  name: netdisk-production
   namespace: production
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: netdisk_production
+      app: netdisk-production
   template:
     metadata:
       labels:
-        app: netdisk_production
+        app: netdisk-production
     spec:
       containers:
-      - name: netdisk_production
+      - name: netdisk-production
         image: registry.cn-hangzhou.aliyuncs.com/876500/netdisk:${build_tag}
         imagePullPolicy: IfNotPresent
         command: ["/bin/bash"]
