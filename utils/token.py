@@ -5,9 +5,9 @@ from jose import jwt, JWTError
 from datetime import datetime, timedelta
 
 crypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-# salt盐
+# token salt盐
 SECRET_KEY = "123456"
-
+# token 加密算法
 ALGORITHM = "HS256"
 
 
